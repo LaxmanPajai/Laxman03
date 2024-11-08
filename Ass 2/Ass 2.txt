@@ -1,0 +1,128 @@
+To create a JavaScript program that captures user registration data, saves it to an array and local storage, and sends it to a server using the AJAX `POST` method, we can break this assignment into several parts. Here’s how you can do it, including displaying the data list on a new page:
+
+### 1. HTML Form
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Registration</title>
+</head>
+<body>
+    <h2>User Registration</h2>
+    <form id="registrationForm">
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" required><br><br>
+
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" required><br><br>
+
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required><br><br>
+
+        <button type="submit">Register</button>
+    </form>
+
+    <!-- Link to new page (list.html) -->
+    <p><a href="list.html" target="_blank">View Registered Users</a></p>
+
+    <script src="script.js"></script>
+</body>
+</html>
+```
+
+### 2. JavaScript File (`script.js`)
+
+```javascript
+document.addEventListener('DOMContentLoaded', function () {
+    const form = document.getElementById('registrationForm');
+
+    // Array to store user data
+    let users = JSON.parse(localStorage.getItem('users')) || [];
+
+    // Function to save user data to local storage
+    function saveUserToLocalStorage(user) {
+        users.push(user);
+        localStorage.setItem('users', JSON.stringify(users));
+    }
+
+    // Form submit event listener
+    form.addEventListener('submit', function (event) {
+        event.preventDefault();
+
+        // Get form values
+        const username = document.getElementById('username').value;
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+
+        // Create user object
+        const newUser = {
+            username: username,
+            email: email,
+            password: password
+        };
+
+        // Save to local storage
+        saveUserToLocalStorage(newUser);
+
+        // Send data using AJAX POST request
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', 'https://example.com/api/register', true); // Replace with a real endpoint
+        xhr.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4 && xhr.status === 200) {
+                alert('User registered successfully!');
+            }
+        };
+        xhr.send(JSON.stringify(newUser));
+
+        // Clear form
+        form.reset();
+    });
+});
+```
+
+### 3. New Page to Display Registered Users (`list.html`)
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registered Users</title>
+</head>
+<body>
+    <h2>Registered Users</h2>
+    <ul id="userList"></ul>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Retrieve users from local storage
+            const users = JSON.parse(localStorage.getItem('users')) || [];
+            const userList = document.getElementById('userList');
+
+            // Display each user in the list
+            users.forEach(user => {
+                const li = document.createElement('li');
+                li.textContent = `Username: ${user.username}, Email: ${user.email}`;
+                userList.appendChild(li);
+            });
+        });
+    </script>
+</body>
+</html>
+```
+
+### Explanation:
+
+1. **Form Handling**: The HTML form collects username, email, and password fields. On form submission, the input data is captured.
+2. **AJAX Request**: The `XMLHttpRequest` object is used to send a `POST` request to a server endpoint. Replace `'https://example.com/api/register'` with your actual endpoint.
+3. **Local Storage**: The user data is stored in local storage to persist user registrations.
+4. **Displaying User Data**: The `list.html` page retrieves user data from local storage and displays it in a list.
+
+### Note:
+- The AJAX `POST` request is directed to `https://example.com/api/register`. Replace this with a real URL if you have an API endpoint for registration.
+- Use a more secure method to handle passwords (e.g., hashing before storing) in production environments. This example keeps it simple for demonstration.
